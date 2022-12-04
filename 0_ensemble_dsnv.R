@@ -8,7 +8,7 @@ is.installed <- function(anypkg){
   
 }
 
-required.packages <- c("caret","prospectr","doParallel","reshape")
+required.packages <- c("caret","prospectr","doParallel","reshape", "MachineShop","BART")
 
 installp <- which(!is.installed(required.packages) == TRUE)
 
@@ -214,44 +214,17 @@ ensemble <- function(wd,infrared.data,reference.data,hout,process){
     
     myFolds <- createFolds(lt, k=)
     
-    # My control --------------------------------------------------------------
-    tc <- trainControl(
-      method = "boot",
-      classProbs = FALSE,
-      verboseIter = FALSE,
-      savePredictions = TRUE,
-      index = myFolds,
-      adaptive = list(min = 5, alpha = 0.05, method ="gls", complete = TRUE),
-      search = "random"
-    )
-    
-    # Control setup
-    
-    #tc <- trainControl(method = "cv", returnResamp = "all", allowParallel = T)
-    
-    # Fit model
+        # Fit model
     options(java.parameters = "-Xmx100g")
     
     require(bartMachine)
-    
-    #mir.bar <- train(mirt, lt,
-                     
-                    # method = 'bartMachine', 
-                     
-                     #preProc = c("center", "scale"),
-                     
-                     #trControl = tc,
-                     
-                     #tuneLength = 2,
-                     
-                     #serialize = TRUE,
-                     
-                     #seed = 123)
-    
-    #print(bartcv)
-    
-    mir.bar <- bartMachine(mirt,lt, serialize = TRUE)
         
+    #mir.bar <- bartMachine(mirt,lt, serialize = TRUE)
+    
+    bmirt <- cbind(lt,mirt)
+    
+    mir.bar <- fit(lt ~ ., data = bmirt, model = BARTModel)
+    
     bar_mir <- predict(mir.bar, mirv)
     
     bar_mir.a <- predict(mir.bar, mir.a) ## predict full set
